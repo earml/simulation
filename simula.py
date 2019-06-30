@@ -68,20 +68,8 @@ for init in dim_1:
         for i in range(start_1, fold_00):
             print (j, i)
             base_1 = sample_1.append(sample_0.iloc[ind[start_2:start_3],:])
-            #var_base_simu[] = base_1
-            #var_base_simu[i] = base_1
             var_base_simu.append(base_1)
-            #var_base_simu[[i]] <- data.frame(base_1)
                         
-            #features_cols = ['idade', 'sexo1', 'sexo2', 'escmae', 'racacorn']
-            #x_train = base_1.loc[:, features_cols]
-            #x_train = base_1[features_cols]
-            #y_train = base_1.pesocat
-                        
-            #for col in ['escmae', 'racacorn']:
-                #x_train[col] = x_train[col].astype('category')
-               # base_1[col] = base_1[col].astype('category')
-            
             base_1 = pd.get_dummies(base_1, columns = ['escmae', 'racacorn'], drop_first = True)
             
             base_1['Intercept'] = 1
@@ -91,7 +79,7 @@ for init in dim_1:
             coef = pd.DataFrame(out2.tables[1].loc[:,['Coef.','Std.Err.','P>|z|']])
             interval_conf = pd.DataFrame(out2.tables[1].loc[:,['[0.025','0.975]']])
             odds_r = pd.DataFrame(np.exp(interval_conf))
-            var_indep = pd.DataFrame(np.concatenate(('Intercept', list(odds_r.index)), axis = None))
+            '''var_indep = pd.DataFrame(np.concatenate(('Intercept', list(odds_r.index)), axis = None))'''
             var_indep = pd.DataFrame(list(odds_r.index))
             var_indep.columns = ['Var']
             probY = pd.DataFrame(np.repeat(i,var_indep.size))
@@ -106,23 +94,13 @@ for init in dim_1:
             res2 = pd.DataFrame()
             res2[['IC_2.5', 'IC_97.5]']] = interval_conf
             res2[['odds_2.5', 'odds_97.5']] = odds_r
-              
-            
+                       
             bigdata = pd.concat([res,res2], axis = 1)                
                       
-      
-        #result = pd.concat([coef[['Coef.']], interval_conf, odds_r], axis = 1)
+            sintese += bigdata
             
-             
-        
-        
-        sintese += bigdata
-        
-        
-      #print(j)
-      
-      start_2 = start_2 + init
-      start_3 = start_3 + init 
+            start_2 = start_2 + init
+            start_3 = start_3 + init 
       
 (time.time() - start)
 
