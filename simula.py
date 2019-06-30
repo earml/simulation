@@ -21,7 +21,7 @@ import seaborn as sns # For plotting/checking assumptions
 
 np.random.seed(seed = 123456789)
 
-d = pd.read_csv("E:\\Rose\\Standard_menard\\Simulation\\base6\\base6.csv", sep = "|")
+d = pd.read_csv("E:\\Simulation\\base6\\base6.csv", sep = "|")
 
 d_simulated = d
 
@@ -104,6 +104,6 @@ for init in dim_1:
       
 (time.time() - start)
 
-var_base_simu.write(var_base_simu, file = "E:/Rose/Standard_menard/Simulation/oversampling/smote5/base_simula.csv", sep = "|",dec = ".",row.names = FALSE)
-sintese.write(sintese, file = "E:/Rose/Standard_menard/Simulation/oversampling/smote5/base_final.csv" ,sep = "|",dec = ".",row.names = FALSE)
+var_base_simu.write(var_base_simu, file = "E:/base_simula.csv", sep = "|",dec = ".",row.names = FALSE)
+sintese.write(sintese, file = "E:/base_final.csv" ,sep = "|",dec = ".",row.names = FALSE)
    
