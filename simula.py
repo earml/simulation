@@ -5,7 +5,8 @@ Created on Thu May 16 20:18:13 2019
 @author: elisalvo
 """
 from IPython import get_ipython
-get_ipython().magic('reset -sf') # = rm(list = ls())
+get_ipython().magic('reset -sf') # = rm(list = ls()) or
+%reset -f
 import pandas as pd
 import numpy as np
 import psutil
@@ -17,7 +18,7 @@ from sklearn.linear_model import LogisticRegression
 #import statsmodels.formula.api as sm
 import statsmodels.api as sm
 import seaborn as sns # For plotting/checking assumptions
-
+import gc
 
 np.random.seed(seed = 123456789)
 
@@ -76,34 +77,77 @@ for init in dim_1:
             model_logit = sm.Logit(base_1.pesocat, base_1.iloc[:,1:base_1.shape[1]]).fit()
             
             out2 = model_logit.summary2()
-            coef = pd.DataFrame(out2.tables[1].loc[:,['Coef.','Std.Err.','P>|z|']])
-            interval_conf = pd.DataFrame(out2.tables[1].loc[:,['[0.025','0.975]']])
+            coef = pd.DataFrame(out2.tables[1].loc[:,['Coef.','Std.Err.','P>|z|']]).reset_index(drop = True)
+            interval_conf = pd.DataFrame(out2.tables[1].loc[:,['[0.025','0.975]']]).reset_index(drop = True)
             odds_r = pd.DataFrame(np.exp(interval_conf))
-            '''var_indep = pd.DataFrame(np.concatenate(('Intercept', list(odds_r.index)), axis = None))'''
-            var_indep = pd.DataFrame(list(odds_r.index))
+            
+            var_indep = pd.DataFrame(list(out2.tables[1].index))
             var_indep.columns = ['Var']
             probY = pd.DataFrame(np.repeat(i,var_indep.size))
             probY.columns = ['probY']
                 
-#######??????????????????????????????                                   
-            res = pd.DataFrame()
-            res[['Var']] = var_indep
-            res[['probY']] = probY
-            res[['Coef.']] = coef[['Coef.']]
-                        
-            res2 = pd.DataFrame()
-            res2[['IC_2.5', 'IC_97.5]']] = interval_conf
-            res2[['odds_2.5', 'odds_97.5']] = odds_r
-                       
-            bigdata = pd.concat([res,res2], axis = 1)                
-                      
-            sintese += bigdata
+            result = pd.concat([var_indep,probY, coef[['Coef.']],interval_conf,odds_r], axis = 1)                
+            result.columns = ['Var', 'probY', 'Coef.', 'IC_2.5', 'IC_97.5', 'odds_2.5', 'odds_97.5']         
+            
+            sintese.append(result)
             
             start_2 = start_2 + init
             start_3 = start_3 + init 
       
+        matrix_base_simu = var_base_simu
+        result_base_simu = sintese
+        ###
+                
+        for s in range(0, len(result_base_simu)):
+            result = result_base_simu[s]
+            if s == 0:
+                d = pd.concat([result])
+            elif s > 0:
+                d = pd.concat([d,result])
+        
+        for t in range(0, len(matrix_base_simu)):
+            result2 = matrix_base_simu[t]
+            if t == 0:
+                d2 = pd.concat([result2])
+            elif t > 0:
+                d2 = pd.concat([d2,result2])
+            
+            
+        #np.hstack(sintese)
+        #np.stack(sintese)
+        ###
+        var_base_simu_final.append(d2)
+        sintese_final.append(d)
+        gc.collect()
+
+ 
+    for u in range(0, len(var_base_simu_final)):
+            result3 = var_base_simu_final[u]
+            if u == 0:
+                d3 = pd.concat([result3])
+            elif u > 0:
+                d3 = pd.concat([d3,result3])
+    
+    for v in range(0, len(sintese_final)):
+            result4 = sintese_final[v]
+            if v == 0:
+                d4 = pd.concat([result4])
+            elif v > 0:
+                d4 = pd.concat([d4,result4])
+                
+    #matrix_final = np.matrix(var_base_simu_final)
+    #matrix_final = np.ravel(var_base_simu_final)
+    matrix_final = d3
+    base_final = d4
+    
+    pd.concat(matrix_final).to_csv("E:/python/base_simula{}".format(init)+".csv", sep = "|",decimal = ".",header = True)
+    base_final.to_csv("E:/python/base_final{}".format(init)+".csv", sep = "|",decimal = ".", header = True)
+    del(matrix_base_simu); del(result_base_simu)
+    del(sintese_final); del(var_base_simu_final)
+    
+    gc.collect()
+        
+        
 (time.time() - start)
 
-var_base_simu.write(var_base_simu, file = "E:/base_simula.csv", sep = "|",dec = ".",row.names = FALSE)
-sintese.write(sintese, file = "E:/base_final.csv" ,sep = "|",dec = ".",row.names = FALSE)
-   
+
